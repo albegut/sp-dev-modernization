@@ -14,6 +14,11 @@ namespace SharePointPnP.Modernization.Framework.Cache
         public string FieldName { get; set; }
 
         /// <summary>
+        /// Internal name of the field
+        /// </summary>
+        public string InternalName { get; set; }
+
+        /// <summary>
         /// Id of the field
         /// </summary>
         public Guid FieldId { get; set; }

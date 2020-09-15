@@ -347,6 +347,7 @@ namespace SharePointPnP.Modernization.Framework.Cache
                                     // copy metadata for this field
                                     FieldData fieldToAdd = new FieldData()
                                     {
+                                        InternalName = sourceField.InternalName,
                                         FieldName = sourceField.StaticName,
                                         FieldId = sourceField.Id,
                                         FieldType = sourceField.TypeAsString,

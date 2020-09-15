@@ -102,6 +102,7 @@
 
         public const string Error_TransformingTaxonomyField = "Error occurred transforming taxonomy field: {0}";
         public const string Error_CommittingTaxonomyField = "Error occurred committing taxonomy field data";
+        public const string Error_GettingTaxonomyField = "Error occurred getting source taxonomy field value of: {0}";
 
         #endregion
 
