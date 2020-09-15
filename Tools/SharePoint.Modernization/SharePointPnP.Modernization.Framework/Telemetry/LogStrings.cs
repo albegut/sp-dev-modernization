@@ -360,6 +360,10 @@
         public const string Term_MappingLoaded = "Mapping Term from {0} to {1} loaded";
         public const string Warning_TermMappingFailedResolveTarget = "Mapping failed to resolve the target term mapping {0}";
         public const string Warning_TermMappingFailedMapping = "Mapping failed to match the page metadata term with the mapping ID:{0}|{1}";
+        public const string TransformCopyingMetaDataTaxFieldGuidTarget = "Copying taxonomy field guid '{0}' not found in target termset";
+        public const string TransformCopyingMetaDataTaxFieldLabelTarget = "Copying taxonomy field label '{0}' not found in target termset";
+        public const string TransformCopyingMetaDataTaxFieldGuid = "Copying taxonomy field guid '{0}' not found in source termset";
+
         #endregion
 
         #region User Mapping

@@ -80,10 +80,10 @@ namespace SharePointPnP.Modernization.Framework.Transform
         ///     TaxonomyFieldValueCollection - Original Array
         ///     List<TaxonomyFieldValue> - Items to remove as they are not resolved
         /// </returns>
-        public Tuple<TaxonomyFieldValueCollection,List<TaxonomyFieldValue>>  TransformCollection(TaxonomyFieldValueCollection taxonomyFieldValueCollection)
+        public Tuple<TaxonomyFieldValueCollection, List<TaxonomyFieldValue>> TransformCollection(TaxonomyFieldValueCollection taxonomyFieldValueCollection)
         {
             List<TaxonomyFieldValue> exceptFields = new List<TaxonomyFieldValue>();
-            
+
             foreach (var fieldValue in taxonomyFieldValueCollection)
             {
                 var result = this.Transform(new TermData() { TermGuid = Guid.Parse(fieldValue.TermGuid), TermLabel = fieldValue.Label });
@@ -97,7 +97,7 @@ namespace SharePointPnP.Modernization.Framework.Transform
                     exceptFields.Add(fieldValue);
                 }
             }
-            
+
             // Return fields to remove by calling code.
             return new Tuple<TaxonomyFieldValueCollection, List<TaxonomyFieldValue>>(taxonomyFieldValueCollection, exceptFields);
         }
@@ -115,32 +115,44 @@ namespace SharePointPnP.Modernization.Framework.Transform
             //Scenarios:
             // Term Ids or Term Names
             // Source or Target Term ID/Name may not be found
-                       
+
             // Default Mode 
-            if (!this.skipTermStoreMapping && !_baseTransformationInformation.IsCrossFarmTransformation)
+            if (!this.skipTermStoreMapping)
             {
                 var resolvedInputMapping = ResolveTermInCache(this._sourceContext, inputSourceTerm.TermGuid);
 
-                if (resolvedInputMapping.IsTermResolved)
+                if (resolvedInputMapping != null && resolvedInputMapping.IsTermResolved)
                 {
                     //Check if the source term ID exists in target then map.
                     var resolvedInputMappingInTarget = ResolveTermInCache(this._targetContext, inputSourceTerm.TermGuid);
-                    if (resolvedInputMappingInTarget.IsTermResolved && !resolvedInputMapping.IsSourceTerm)
+                    if (resolvedInputMappingInTarget != null && resolvedInputMappingInTarget.IsTermResolved && !resolvedInputMapping.IsSourceTerm)
                     {
                         inputSourceTerm.IsTermResolved = true; //Happy that term ID is the same as source
                         inputSourceTerm.TermLabel = resolvedInputMappingInTarget.TermLabel; //Just in case the ids are the same and labels are not
                         return inputSourceTerm;
                     }
+                    else
+                    {
+                        LogWarning(string.Format(LogStrings.TransformCopyingMetaDataTaxFieldGuidTarget, inputSourceTerm.TermGuid), LogStrings.Heading_CopyingPageMetadata);
+                    }
 
                     //Check if the term labels are the same, ids maybe different - in this scenario, validate if the term paths are the same.
                     //if so, then auto-map.
                     resolvedInputMappingInTarget = ResolveTermInCache(this._targetContext, resolvedInputMapping.TermPath);
-                    if (resolvedInputMappingInTarget.IsTermResolved && !resolvedInputMapping.IsSourceTerm)
+                    if (resolvedInputMappingInTarget != null && resolvedInputMappingInTarget.IsTermResolved && !resolvedInputMapping.IsSourceTerm)
                     {
                         inputSourceTerm.IsTermResolved = true; //Happy that term ID is the same as source
                         inputSourceTerm.TermGuid = resolvedInputMappingInTarget.TermGuid; //Just in case the ids are the same and labels are not
                         return inputSourceTerm;
                     }
+                    else
+                    {
+                        LogWarning(string.Format(LogStrings.TransformCopyingMetaDataTaxFieldLabelTarget, inputSourceTerm.TermPath), LogStrings.Heading_CopyingPageMetadata);
+                    }
+                }
+                else
+                {
+                    LogWarning(string.Format(LogStrings.TransformCopyingMetaDataTaxFieldGuid, inputSourceTerm.TermGuid), LogStrings.Heading_CopyingPageMetadata);
                 }
 
             }
@@ -348,7 +360,7 @@ namespace SharePointPnP.Modernization.Framework.Transform
         public TermData ResolveTermInCache(ClientContext context, string termPath)
         {
             //Use the cache
-            var result = CacheManager.Instance.GetTransformTermCacheTermByName(context, termPath:termPath);
+            var result = CacheManager.Instance.GetTransformTermCacheTermByName(context, termPath: termPath);
             if (result != default && result.Any())
             {
                 var cachedTerm = result.First();
@@ -443,10 +455,10 @@ namespace SharePointPnP.Modernization.Framework.Transform
                  "<soap:Body>" +
                      "<GetChildTermsInTermSet xmlns=\"http://schemas.microsoft.com/sharepoint/taxonomy/soap/\">" +
                        "<sspId>{0}</sspId>" +
-                       "<termSetId>{1}</termSetId> "+
+                       "<termSetId>{1}</termSetId> " +
                        "<lcid>{2}</lcid>" +
                      "</GetChildTermsInTermSet>" +
-                 "</soap:Body>", sspId.ToString(), termSetId.ToString(),1033));
+                 "</soap:Body>", sspId.ToString(), termSetId.ToString(), 1033));
 
                 soapEnvelope.Append("</soap:Envelope>");
 
@@ -497,7 +509,7 @@ namespace SharePointPnP.Modernization.Framework.Transform
                        */
 
                         XElement queryXml = XElement.Parse(xDoc.DocumentElement.InnerText);
-                        var xmlTermSetId = termSetId.ToString().Trim('{','}');
+                        var xmlTermSetId = termSetId.ToString().Trim('{', '}');
                         var xmlTermSetLabel = "";
                         var foundTermSetName = false;
                         var listOfTerms = new List<XmlTermSetTerm>();
@@ -527,7 +539,7 @@ namespace SharePointPnP.Modernization.Framework.Transform
 
                             listOfTerms.Add(term);
 
-                            
+
                         }
 
                         //Term Set Details
